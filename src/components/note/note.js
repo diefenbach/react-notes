@@ -9,8 +9,8 @@ class Note extends Component {
         this.loadData(this.props.match.params.noteId);
     }
 
-    componentDidUpdate() {
-        if (this.props.match.params.noteId !== this.state.note.id) {
+    componentDidUpdate() {        
+        if (+this.props.match.params.noteId !== this.state.note.id) {
             this.loadData(this.props.match.params.noteId)
         }
     }
