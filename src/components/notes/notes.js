@@ -12,6 +12,24 @@ class Notes extends Component {
         notes: [],
     }
     
+    onFilterKeyUp = event => {                
+        const value = event.target.value.toLowerCase();
+        if (this.state.folderId === 'all') {
+            axios.get('http://localhost:8000/api/notes?q=' + value).then(response => {
+                this.setState({
+                    notes: response.data,
+                });
+            })            
+        } else {
+            axios.get('http://localhost:8000/api/folders/' + this.state.folderId).then(response => {
+                const notes = response.data.notes.filter(note => note.title.toLowerCase().includes(value));
+                this.setState({
+                    notes: notes,
+                });
+            })            
+        }
+    }
+
     componentDidUpdate() {
         if (this.props.match.params.folderId !== this.state.folderId) {
             this.loadData(this.props.match.params.folderId);
@@ -43,6 +61,9 @@ class Notes extends Component {
     render() {
         return (
             <React.Fragment>
+                <input 
+                    placeholder="filter" 
+                    onKeyUp={this.onFilterKeyUp}/>
                 <Folders />
                 <h1>Notes</h1>
                 {this.state.notes.map(note => <div key={note.id}><Link to={this.props.match.url + "/note/" + note.id}>{note.title}</Link></div>)}
