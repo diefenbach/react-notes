@@ -19,6 +19,7 @@ class Folders extends Component {
         return (
             <React.Fragment>
                 <h1>Folders</h1> 
+                <Link to='/folder/all'>All</Link>
                 {this.state.folders.map(folder => <div key={folder.id}><Link to={'/folder/' + folder.id }>{folder.title}</Link></div>)}
             </React.Fragment>
         )
