@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from "react-router-dom";
+import axios from 'axios';
 
 class Folders extends Component {
     state = {
@@ -7,16 +8,11 @@ class Folders extends Component {
     }
 
     componentDidMount() {
-        // Alternative could be anxious
-        fetch('http://localhost:8000/api/folders')
-            .then(data => {
-                return data.json();
-            })
-            .then(folders => {
-                this.setState({
-                    folders: folders,
-                });
-            })
+        axios.get('http://localhost:8000/api/folders').then(response => {
+            this.setState({
+                folders: response.data,
+            });
+        })
     }
     
     render() {

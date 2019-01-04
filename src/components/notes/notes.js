@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Route, Link } from "react-router-dom";
+import axios from 'axios';
 
 import Folders from '../folders/folders';
 import Note from '../note/note';
@@ -22,30 +23,20 @@ class Notes extends Component {
     }
 
     loadData(folderId) {
-        // Alternative could be anxious
-        
         if (folderId === 'all') {
-            fetch('http://localhost:8000/api/notes')
-                .then(data => {
-                    return data.json();
-                })
-                .then(notes => {
-                    this.setState({
-                        notes: notes,
-                        folderId: folderId,
-                    });
-                })
+            axios.get('http://localhost:8000/api/notes').then(response => {
+                this.setState({
+                    notes: response.data,
+                    folderId: folderId,
+                });
+            })
         } else {
-            fetch('http://localhost:8000/api/folders/' + folderId)
-                .then(data => {
-                    return data.json();
-                })
-                .then(folder => {
-                    this.setState({
-                        notes: folder.notes,
-                        folderId: folderId,
-                    });
-                })            
+            axios.get('http://localhost:8000/api/folders/' + folderId).then(response => {
+                this.setState({
+                    notes: response.data.notes,
+                    folderId: folderId,
+                });
+            })            
         }
     }
 
