@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 
 class Note extends Component {
     state = {
         note: {},
-    }
+    }    
 
     componentDidMount() {
         this.loadData(this.props.match.params.noteId);
@@ -16,16 +17,11 @@ class Note extends Component {
     }
 
     loadData(noteId) {
-        // Alternative could be anxious
-        fetch('http://localhost:8000/api/notes/' + noteId)
-            .then(data => {
-                return data.json();
-            })
-            .then(note => {
-                this.setState({
-                    note: note,
-                });
-            })
+        axios.get('http://localhost:8000/api/notes/' + noteId).then(response => {
+            this.setState({
+                note: response.data,
+            });
+        })
     }
     
     render() {
