@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 
 import { Route, Link } from "react-router-dom";
-import axios from 'axios';
+
+import * as actionCreators from '../../store/actions';
 
 import Folders from '../folders/folders';
 import Note from '../note/note';
@@ -31,51 +33,25 @@ class Notes extends Component {
 
     onAddNoteKeyDown = event => {
         if (event.keyCode === 13) {
-            const data = {
-                title: event.target.value,
-                folder: this.state.folderId,
-            };
-    
-            axios.post('http://localhost:8000/api/notes', data).then(response => {
-                this.loadData(this.props.match.params.folderId);
-                this.noteNameInput.current.value = '';
-            })            
+            this.props.onAddNote(event.target.value, this.state.folderId);
+            this.noteNameInput.current.value = '';
         }
     }
 
     onFilterKeyUp = event => {                
-        const value = event.target.value.toLowerCase();
-        if (this.state.folderId === 'all') {
-            axios.get('http://localhost:8000/api/notes?q=' + value).then(response => {
-                this.setState({
-                    notes: response.data,
-                });
-            })            
-        } else {
-            axios.get('http://localhost:8000/api/folders/' + this.state.folderId).then(response => {
-                const notes = response.data.notes.filter(note => note.title.toLowerCase().includes(value));
-                this.setState({
-                    notes: notes,
-                });
-            })            
-        }
+        const filter = event.target.value.toLowerCase();
+        this.loadData(this.state.folderId, filter);
     }
 
-    loadData(folderId) {
+    loadData(folderId, filter) {
+        this.setState({
+            folderId: folderId,
+        });
+
         if (folderId === 'all') {
-            axios.get('http://localhost:8000/api/notes').then(response => {
-                this.setState({
-                    notes: response.data,
-                    folderId: folderId,
-                });
-            })
+            this.props.onLoadNotes(filter);
         } else {
-            axios.get('http://localhost:8000/api/folders/' + folderId).then(response => {
-                this.setState({
-                    notes: response.data.notes,
-                    folderId: folderId,
-                });
-            })            
+            this.props.onLoadFolder(folderId, filter);
         }
     }
 
@@ -94,11 +70,25 @@ class Notes extends Component {
                     ref={this.noteNameInput}
                     onKeyDown={this.onAddNoteKeyDown} />
 
-                {this.state.notes.map(note => <div key={note.id}><Link to={this.props.match.url + "/note/" + note.id}>{note.title}</Link></div>)}
+                {this.props.notes.map(note => <div key={note.id}><Link to={this.props.match.url + "/note/" + note.id}>{note.title}</Link></div>)}
                 <Route path={this.props.match.url + "/note/:noteId"} component={Note} />
             </React.Fragment>
         )
     }
 }
 
-export default Notes;
+const mapStateToProps = state => {
+    return {
+        notes: state.notes,
+    }
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onAddNote: (title, folderId) => dispatch(actionCreators.addNote(title, folderId)),
+        onLoadNotes: filter => dispatch(actionCreators.loadNotes(filter)),
+        onLoadFolder: (folderId, filter) => dispatch(actionCreators.loadFolder(folderId, filter)),
+    }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Notes);

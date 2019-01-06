@@ -1,47 +1,28 @@
 import React, { Component } from 'react';
-import { Link } from "react-router-dom";
-import axios from 'axios';
+import { Link, withRouter } from "react-router-dom";
+import { connect } from 'react-redux';
+import { addFolder, loadFolders }  from '../../store/actions';
+
 
 class Folders extends Component {
     constructor(props) {
         super(props);
-
         this.folderNameInput = React.createRef()
-
-        this.state = {
-            folders: [],
-            folderName: '',
-        }
     }
 
     componentDidMount() {
-        axios.get('http://localhost:8000/api/folders').then(response => {
-            this.setState({
-                folders: response.data,
-            });
-        })        
+        this.props.onLoadFolders();
     }
 
-    onAddFolderKeyDown = event => {                
-        if (event.keyCode === 13) {
-            const data = {title: event.target.value};
-            axios.post('http://localhost:8000/api/folders', data).then(response => {
-                this.folderNameInput.current.value = '';
-                this.loadData();
-            })
+    onAddFolderKeyDown = event => {                        
+        if (event.keyCode === 13) {    
+            this.props.onAddFolder(event.target.value, this.props.history);
+            this.folderNameInput.current.value = '';
         }
     }
 
-    loadData() {
-        axios.get('http://localhost:8000/api/folders').then(response => {
-            this.setState({
-                folders: response.data,
-            });
-        })        
-    }
-
     render() {
-        return (
+        return (    
             <React.Fragment>
                 <h1>Folders</h1> 
                 <div>
@@ -54,10 +35,24 @@ class Folders extends Component {
                 </div>
 
                 <Link to='/folder/all'>All</Link>
-                {this.state.folders.map(folder => <div key={folder.id}><Link to={'/folder/' + folder.id }>{folder.title}</Link></div>)}
+                {this.props.folders.map(folder => <div key={folder.id}><Link to={'/folder/' + folder.id }>{folder.title}</Link></div>)}
             </React.Fragment>
         )
     }
 }
 
-export default Folders;
+const mapStateToProps = state => {
+    return {
+        folders: state.folders,
+        newFolderId: state.newFolderId,
+    }
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onAddFolder: (title, history) => dispatch(addFolder(title, history)),
+        onLoadFolders: () => dispatch(loadFolders()),
+    }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Folders));
