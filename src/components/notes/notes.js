@@ -16,7 +16,7 @@ class Notes extends Component {
         this.noteNameInput = React.createRef()
 
         this.state = {
-            folderId: undefined,
+            folderId: null,
             notes: [],    
         }    
     }
@@ -33,8 +33,14 @@ class Notes extends Component {
 
     onAddNoteKeyDown = event => {
         if (event.keyCode === 13) {
-            this.props.onAddNote(event.target.value, this.state.folderId);
-            this.noteNameInput.current.value = '';
+            this.props.onAddNote(event.target.value, this.state.folderId).then(() => {
+                this.noteNameInput.current.value = '';
+                if (this.state.folderId && this.state.folderId !== 'all') {
+                    this.props.onLoadFolder(this.state.folderId);
+                } else {
+                    this.props.onLoadNotes();
+                }
+            })
         }
     }
 
@@ -86,7 +92,8 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
     return {
         onAddNote: (title, folderId) => dispatch(actionCreators.addNote(title, folderId)),
-        onLoadNotes: filter => dispatch(actionCreators.loadNotes(filter)),
+        onAddedNote: (result) => dispatch(actionCreators.addedNote(result)),
+        onLoadNotes: (filter) => dispatch(actionCreators.loadNotes(filter)),
         onLoadFolder: (folderId, filter) => dispatch(actionCreators.loadFolder(folderId, filter)),
     }
 };

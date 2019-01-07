@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Link, withRouter } from "react-router-dom";
 import { connect } from 'react-redux';
-import { addFolder, loadFolders }  from '../../store/actions';
+import { addFolder, loadFolders, addedFolder }  from '../../store/actions';
 
 
 class Folders extends Component {
@@ -16,8 +16,11 @@ class Folders extends Component {
 
     onAddFolderKeyDown = event => {                        
         if (event.keyCode === 13) {    
-            this.props.onAddFolder(event.target.value, this.props.history);
-            this.folderNameInput.current.value = '';
+            this.props.onAddFolder(event.target.value).then(response => {            
+                this.folderNameInput.current.value = '';
+                this.props.history.push('/folder/' + response.data.id);
+                this.props.onLoadFolders();
+            })
         }
     }
 
@@ -50,7 +53,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        onAddFolder: (title, history) => dispatch(addFolder(title, history)),
+        onAddFolder: (title) => dispatch(addFolder(title)),
+        onAddedFolder: (result) => dispatch(addedFolder(result)),
         onLoadFolders: () => dispatch(loadFolders()),
     }
 };

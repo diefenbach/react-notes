@@ -63,44 +63,40 @@ export const loadFolders = () => {
 }
 
 
-export const addedFolder = result => {
+export const addedFolder = (result) => {
     return {
         type: ADD_FOLDER,
         newFolderId: result.id,
     };
 }
 
-export const addFolder = (title, history) => {
+export const addFolder = (title) => {
     return dispatch => {
         const data = {title: title};
-        axios.post('http://localhost:8000/api/folders', data).then(response => {            
-            history.push('/folder/' + response.data.id);
+        return axios.post('http://localhost:8000/api/folders', data).then(response => {
             dispatch(addedFolder(response.data));
-            dispatch(loadFolders());
-        })
+            return response;
+        });
     }
 }
 
 
-export const addedNote = result => {            
+export const addedNote = () => {            
     return {
         type: ADD_NOTE,
     };
 }
 
 export const addNote = (title, folderId) => {
-    return dispatch => {
-        let url = 'http://localhost:8000/api/notes';
+    return (dispatch) => {        
+        const data = {
+            title: title, 
+            folder: folderId
+        };
 
-        const data = {title: title, folder: folderId};
-        
-        axios.post(url, data).then(response => {
+        return axios.post('http://localhost:8000/api/notes', data).then(response => {
             dispatch(addedNote());
-            if (folderId && folderId !== 'all') {
-                dispatch(loadFolder(folderId));
-            } else {
-                dispatch(loadNotes());
-            }
-        })
+            return response;
+        }) 
     }
 }
