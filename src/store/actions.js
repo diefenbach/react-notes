@@ -14,17 +14,15 @@ export const loadedNotes = result => {
 }
 
 export const loadNotes = filter => {    
-    console.log(filter);
-    return dispatch => {
+    return async dispatch => {
         let url = 'http://localhost:8000/api/notes';
 
         if (filter) {
             url += '?q=' + filter
         }
 
-        axios.get(url).then(response => {
-            dispatch(loadedNotes(response.data));
-        })
+        const response = await axios.get(url);
+        dispatch(loadedNotes(response.data));
     }
 };
 
@@ -37,13 +35,10 @@ export const loadedFolder = result => {
 }
 
 export const loadFolder = (folderId, filter = '') => {    
-    return dispatch => {        
-        let url = 'http://localhost:8000/api/folders/' + folderId;
-
-        axios.get(url).then(response => {
-            const notes = response.data.notes.filter(note => note.title.toLowerCase().includes(filter.toLowerCase()));
-            dispatch(loadedFolder(notes));
-        })
+    return async dispatch => {        
+        const response = await axios.get('http://localhost:8000/api/folders/' + folderId);
+        const notes = response.data.notes.filter(note => note.title.toLowerCase().includes(filter.toLowerCase()));
+        dispatch(loadedFolder(notes));
     }
 }
 
@@ -55,10 +50,9 @@ export const loadedFolders = result => {
 }
 
 export const loadFolders = () => {    
-    return dispatch => {        
-        axios.get('http://localhost:8000/api/folders').then(response => {
-            dispatch(loadedFolders(response.data));
-        })
+    return async dispatch => {        
+        const response = await axios.get('http://localhost:8000/api/folders');
+        dispatch(loadedFolders(response.data));
     }
 }
 
@@ -71,12 +65,10 @@ export const addedFolder = (result) => {
 }
 
 export const addFolder = (title) => {
-    return dispatch => {
-        const data = {title: title};
-        return axios.post('http://localhost:8000/api/folders', data).then(response => {
-            dispatch(addedFolder(response.data));
-            return response;
-        });
+    return async dispatch => {
+        const response = await axios.post('http://localhost:8000/api/folders', {title});
+        dispatch(addedFolder(response.data));
+        return response;
     }
 }
 
@@ -87,16 +79,10 @@ export const addedNote = () => {
     };
 }
 
-export const addNote = (title, folderId) => {
-    return (dispatch) => {        
-        const data = {
-            title: title, 
-            folder: folderId
-        };
-
-        return axios.post('http://localhost:8000/api/notes', data).then(response => {
-            dispatch(addedNote());
-            return response;
-        }) 
+export const addNote = (title, folder) => {
+    return async (dispatch) => {        
+        const response = await axios.post('http://localhost:8000/api/notes', {title, folder});
+        dispatch(addedNote());
+        return response; 
     }
 }
